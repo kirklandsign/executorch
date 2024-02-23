@@ -33,9 +33,6 @@ def export_to_xnnpack(model, example_inputs, quantize=False):
 
     model = model.eval()
 
-    # pre-autograd export. eventually this will become torch.export
-    model = torch._export.capture_pre_autograd_graph(model, example_inputs)
-
     if quantize:
         logging.info("Quantizing Model...")
         # TODO(T165162973): This pass shall eventually be folded into quantizer

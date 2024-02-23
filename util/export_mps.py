@@ -32,9 +32,6 @@ def export_to_mps(model, example_inputs, use_partitioner=False, bundled=False,us
 
     model = model.eval()
 
-    # pre-autograd export. eventually this will become torch.export
-    model = torch._export.capture_pre_autograd_graph(model, example_inputs)
-
     edge: EdgeProgramManager = export_to_edge(
         model,
         example_inputs,

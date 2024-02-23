@@ -34,9 +34,6 @@ def export_to_coreml(model, example_inputs, compute_units="all"):
 
     model = model.eval()
 
-    # pre-autograd export. eventually this will become torch.export
-    model = torch._export.capture_pre_autograd_graph(model, example_inputs)
-
     edge: EdgeProgramManager = export_to_edge(
         model,
         example_inputs,
