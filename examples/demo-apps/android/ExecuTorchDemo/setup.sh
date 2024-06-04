@@ -7,34 +7,14 @@
 
 set -eu
 
-CMAKE_OUT="${CMAKE_OUT:-cmake-out-android}"
-# Note: Set up ANDROID_NDK and ANDROID_ABI
-cmake . -DCMAKE_INSTALL_PREFIX="${CMAKE_OUT}" \
-  -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK}/build/cmake/android.toolchain.cmake" \
-  -DANDROID_ABI="${ANDROID_ABI}" \
-  -DEXECUTORCH_BUILD_XNNPACK=ON \
-  -DEXECUTORCH_BUILD_EXTENSION_DATA_LOADER=ON \
-  -DEXECUTORCH_BUILD_EXTENSION_MODULE=ON \
-  -DEXECUTORCH_BUILD_OPTIMIZED=ON \
-  -DCMAKE_BUILD_TYPE=Release \
-  -B"${CMAKE_OUT}"
+AAR_URL="https://gha-artifacts.s3.amazonaws.com/pytorch/executorch/9357260259/artifact/executorch.aar"
+AAR_SHASUM="2081b318fefe105e5f92249350c4551a1f3826ec"
 
-if [ "$(uname)" == "Darwin" ]; then
-  CMAKE_JOBS=$(( $(sysctl -n hw.ncpu) - 1 ))
-else
-  CMAKE_JOBS=$(( $(nproc) - 1 ))
+LIBS_PATH="$(dirname "$0")/app/libs"
+AAR_PATH="${LIBS_PATH}/executorch-llama.aar"
+
+mkdir -p "$LIBS_PATH"
+
+if [[ ! -f "${AAR_PATH}" || "${AAR_SHASUM}" != $(shasum "${AAR_PATH}" | awk '{print $1}') ]]; then
+  curl "${AAR_URL}" -o "${AAR_PATH}"
 fi
-cmake --build "${CMAKE_OUT}" -j "${CMAKE_JOBS}" --target install --config Release
-
-cmake extension/android \
-  -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
-  -DANDROID_ABI="${ANDROID_ABI}" \
-  -DCMAKE_INSTALL_PREFIX="${CMAKE_OUT}" \
-  -DCMAKE_BUILD_TYPE=Release \
-  -B"${CMAKE_OUT}"/extension/android
-
-cmake --build "${CMAKE_OUT}"/extension/android -j "${CMAKE_JOBS}" --config Release
-
-JNI_LIBS_PATH="examples/demo-apps/android/ExecuTorchDemo/app/src/main/jniLibs"
-mkdir -p "${JNI_LIBS_PATH}/${ANDROID_ABI}"
-cp "${CMAKE_OUT}"/extension/android/libexecutorch_jni.so "${JNI_LIBS_PATH}/${ANDROID_ABI}/"
