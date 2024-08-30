@@ -798,6 +798,7 @@ endif()
 
 if(EXECUTORCH_BUILD_VULKAN)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/vulkan)
+
 endif()
 
 # Print all summary
