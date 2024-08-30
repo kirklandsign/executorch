@@ -794,6 +794,7 @@ if(EXECUTORCH_BUILD_EXECUTOR_RUNNER)
   endif()
   target_link_libraries(executor_runner ${_executor_runner_libs})
   target_compile_options(executor_runner PUBLIC ${_common_compile_options})
+
 endif()
 
 if(EXECUTORCH_BUILD_VULKAN)
